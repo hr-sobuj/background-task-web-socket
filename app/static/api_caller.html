@@ -35,9 +35,9 @@
             taskId = data.task_id;
             console.log("Task started with ID: ", taskId);
 
-            // checkTaskStatus(taskId);
+            checkTaskStatus(taskId);
 
-            startWebSocket(taskId);
+            // startWebSocket(taskId);
         }
 
         async function checkTaskStatus(taskId) {
@@ -55,20 +55,20 @@
             }, 1000);
         }
 
-        function startWebSocket(taskId) {
-            const socket = new WebSocket(`ws://localhost:8000/ws/${taskId}`);
+        // function startWebSocket(taskId) {
+        //     const socket = new WebSocket(`ws://localhost:8000/ws/${taskId}`);
 
-            socket.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                if (data.status === 'done' || data.status === 'failed') {
-                    document.getElementById('status').innerText = `Task Status: ${data.status}. Result: ${data.result}`;
-                    socket.close();
-                } else {
-                    console.log('Task is still processing...');
-                    document.getElementById('status').innerText = "Task Status: Processing...";
-                }
-            };
-        }
+        //     socket.onmessage = function(event) {
+        //         const data = JSON.parse(event.data);
+        //         if (data.status === 'done' || data.status === 'failed') {
+        //             document.getElementById('status').innerText = `Task Status: ${data.status}. Result: ${data.result}`;
+        //             socket.close();
+        //         } else {
+        //             console.log('Task is still processing...');
+        //             document.getElementById('status').innerText = "Task Status: Processing...";
+        //         }
+        //     };
+        // }
     </script>
 </body>
 </html>
