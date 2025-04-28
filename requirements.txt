@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+qdrant-client
+langchain
+psycopg2-binary
+langchain-community
+sentence-transformers
+pydantic
+langchain-huggingface
+huggingface_hub[hf_xet]
+hf_xet

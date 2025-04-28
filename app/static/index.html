@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Status</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #status { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Task Status Monitor</h1>
+    <label for="text">Enter text to generate embedding:</label>
+    <textarea id="text" rows="4" cols="50"></textarea><br><br>
+    <button onclick="startTask()">Start Task</button>
+
+    <h2 id="status">Task Status: Not started</h2>
+
+    <script>
+        let taskId = "";
+
+        async function startTask() {
+            const text = document.getElementById('text').value;
+
+            // Send a POST request to start the task
+            const response = await fetch('http://localhost:8000/start-task/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            });
+
+            const data = await response.json();
+            taskId = data.task_id;
+            console.log("Task started with ID: ", taskId);
+
+            // Start polling to check task status
+            checkTaskStatus(taskId);
+
+            // Optional: Start WebSocket for real-time updates
+            startWebSocket(taskId);
+        }
+
+        // Polling every second to check task status
+        async function checkTaskStatus(taskId) {
+            const interval = setInterval(async () => {
+                const response = await fetch(`http://localhost:8000/check-task/${taskId}`);
+                const data = await response.json();
+
+                if (data.status === 'done' || data.status === 'failed') {
+                    clearInterval(interval);
+                    document.getElementById('status').innerText = `Task Status: ${data.status}. Result: ${data.result}`;
+                } else {
+                    console.log('Task is still processing...');
+                    document.getElementById('status').innerText = "Task Status: Processing...";
+                }
+            }, 1000);  // Check every 1 second
+        }
+
+        // WebSocket for real-time updates
+        function startWebSocket(taskId) {
+            const socket = new WebSocket(`ws://localhost:8000/ws/${taskId}`);
+
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.status === 'done' || data.status === 'failed') {
+                    document.getElementById('status').innerText = `Task Status: ${data.status}. Result: ${data.result}`;
+                    socket.close();
+                } else {
+                    console.log('Task is still processing...');
+                    document.getElementById('status').innerText = "Task Status: Processing...";
+                }
+            };
+        }
+    </script>
+</body>
+</html>
